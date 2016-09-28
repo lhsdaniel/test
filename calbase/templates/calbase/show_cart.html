@@ -1,0 +1,6 @@
+{% load carton_tags %}
+{% get_cart as cart %}
+
+{% for item in cart.items %}
+    {{ item.equipment.description }}
+{% endfor %}

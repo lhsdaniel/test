@@ -1,0 +1,14 @@
+# templates/cart.html
+
+{% block body %}
+    <table>
+        <tr>
+            <th>Equipment</th>
+        </tr>
+        {% for item in cart %}
+        <tr>
+            <td>{{ item.equipment.description }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+{% endblock %}

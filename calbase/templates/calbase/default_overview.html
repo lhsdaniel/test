@@ -1,0 +1,193 @@
+{% extends 'calbase/default.html' %}
+{% block content %}
+
+<script>
+  function toggle(source) {
+    checkboxes = document.getElementsByName('check_list');
+    for(var i=0, n=checkboxes.length;i<n;i++) {
+      checkboxes[i].checked = source.checked;
+    }
+  }
+</script>
+
+<script>
+  function toggleCart(source) {
+    checkboxes = document.getElementsByName('formlist');
+    for(var i=0, n=checkboxes.length;i<n;i++) {
+      checkboxes[i].checked = source.checked;
+    }
+  }
+</script>
+
+<div class="container-fluid">
+  <div class="row">
+    <div class="col-sm-3 col-md-2 sidebar">
+      <ul class="nav nav-sidebar">
+        <li class="active"><a href="/calbase">Overview <span class="sr-only">(current)</span></a></li>
+        <li><a href="{% url 'calbase:default_new' %}" >New</a></li>
+        <li><a href="/calbase/export/custom">Export</a></li>
+      </ul>
+          <!-- <ul class="nav nav-sidebar">
+            <li><a href="">Nav item</a></li>
+            <li><a href="">Nav item again</a></li>
+            <li><a href="">One more nav</a></li>
+            <li><a href="">Another nav item</a></li>
+            <li><a href="">More navigation</a></li>
+          </ul>
+          <ul class="nav nav-sidebar">
+            <li><a href="">Nav item again</a></li>
+            <li><a href="">One more nav</a></li>
+            <li><a href="">Another nav item</a></li>
+          </ul> -->
+        </div>
+
+        <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+          <h1 class="page-header"> Equipment Calibration Database!</h1>
+
+          
+          {% if cart.items %}
+
+          <div class="panel panel-primary">
+
+            <div class="panel-heading">
+              <h3 class="panel-title">Cart  <span class="badge">{{cart.unique_count}}</span></h3>
+            </div>
+
+
+
+
+
+            <div class="panel-body">
+              <div class="table-responsive">
+                <table class="table table-striped">
+                  <thead>
+                    <tr>
+                      <th><input type="checkbox" onClick="toggleCart(this)"></th>
+                      <th>Asset Number</th>
+                      <th>Manufacturer</th>
+                      <th>Model</th>
+                      <th>Description</th>
+                      <th>Time</th>
+                    </tr>
+                  </thead>
+
+                  <tbody>
+                    <form id="formlist" action="" method="get" accept-charset="utf-8">
+                      {% for item in cart.items %}
+                      <tr>
+                        <td><input type="checkbox" name="formlist" value= "{{ item.equipment.id }}"></td>
+                        <td><a href="{% url 'calbase:default_detail' item.equipment.id %}">{{ item.equipment.asset_number }}</a></td>
+                        <td>{{ item.equipment.manufacturer.name }}</td>
+                        <td>{{ item.equipment.model }}</td>
+                        <td>{{ item.equipment.description }}</td>
+                        <td>{{ item.equipment.timestamp }}</td>
+
+
+                      </tr>
+                      {% endfor %}
+                      <button  class= "btn btn-default btn-sm" type="submit" >
+                        <span class="glyphicon glyphicon-remove" ></span>
+
+                        Remove from cart
+                      </button>
+                      
+                    </form>
+                  </tbody>
+                </table>
+              </div>
+              <a href="{% url 'calbase:cart_add_cal' %}"><button  class= "btn btn-default btn-sm"  name = 'group_flag'>
+                <span class="glyphicon glyphicon-cog" ></span>
+
+                Add Calibrtaions for all carted
+              </button></a>
+              <a href="{% url 'calbase:cart_add_flag' %}"><button  class= "btn btn-default btn-sm"  name = 'group_cal'>
+                <span class="glyphicon glyphicon-flag" ></span>
+
+                Add Flag for all carted
+              </button></a>
+            </div>
+
+          </div>
+          {% endif %}
+
+
+          <h2 class="sub-header">Overview</h2>
+          {% include "calbase/messages_display.html" %}
+
+
+
+          <div class="table-responsive">
+            <form id="search_form" method='GET' action='' class='row'>
+             <div class='col-sm-6'>
+              <div class='input-group'>
+                <input class='form-control' type='text' name='q' placeholder='Search All' value='{{ request.GET.q }}'/>
+                <span class='input-group-btn'>
+                 <!--  <input class='btn btn-default' type='submit' value='Search' /> -->
+                 <button class='btn btn-default' type='submit' name="search_form">Search <i class="fa fa-search"></i></button>
+               </span>
+             </div>
+           </div>
+         </form>
+         <table class="table table-striped">
+          <thead>
+            <tr>
+              <th><input type="checkbox" onClick="toggle(this)"></th>
+              <th>Asset Number</th>
+              <th>Serial Number</th>
+              <th>Manufacturer</th>
+              <th>Model</th>
+              <th>Description</th>
+              <th>Time</th>
+              <th>Department</th>
+
+            </tr>
+          </thead>
+
+          <tbody>
+            <form id="checklist" action="/calbase" method="get" accept-charset="utf-8">
+              {% for equipments in equipment_list %}
+              <tr>
+                <div class = "list-group"
+                <a href="#" class="list-group-item list-group-item-action">
+
+                  <td><input type="checkbox" name="check_list" value= "{{ equipments.id }}"></td>
+                  <td><a href="{% url 'calbase:default_detail' equipments.id %}">{{ equipments.asset_number }}</a></td>
+                  <td>{{ equipments.serial_number }}</td>
+                  <td>{{ equipments.manufacturer }}</td>
+                  <td>{{ equipments.model }}</td>
+                  <td>{{ equipments.description }}</td>
+                  <td>{{ equipments.timestamp }}</td>
+                  <td>{{ equipments.department }}</td>
+                  
+
+                </tr>
+                {% endfor %}
+                
+                <button  class= "btn btn-default btn-sm" type="submit" >
+                  <span class="glyphicon glyphicon-plus" ></span>
+
+                  Add to cart
+                </button>
+                
+              </form>
+            </tbody>
+          </table>
+          <div class="pagination">
+            <span class="step-links">
+              {% if equipment_list.has_previous %}
+              <a href="?{{ page_request_var }}={{ object_list.previous_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}">previous</a>
+              {% endif %}
+
+              <span class="current">
+                Page {{ equipment_list.number }} of {{ equipment_list.paginator.num_pages }}.
+              </span>
+
+              {% if equipment_list.has_next %}
+              <a href="?{{ page_request_var }}={{ equipment_list.next_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}">next</a>
+              {% endif %}
+            </span>
+          </div>
+        </div>
+      </div>
+      {% endblock %}
+      

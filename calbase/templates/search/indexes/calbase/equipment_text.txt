@@ -1,0 +1,3 @@
+{{ object.asset_number}}
+
+{{ object.serial_number }}

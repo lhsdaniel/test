@@ -1,0 +1,10 @@
+{% extends 'calbase/default.html' %}
+
+{% block content %}
+
+
+<p>Logged out sucessfully</p>
+
+<meta http-equiv="refresh" content="{% url 'calbase:default_overview' %}" />
+
+{% endblock %}

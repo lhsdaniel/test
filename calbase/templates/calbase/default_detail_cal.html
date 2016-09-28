@@ -1,0 +1,12 @@
+{% extends 'calbase/default_detail.html' %}
+{% load crispy_forms_tags %} 
+
+{% block cal %}
+<form method="POST" action = "{% url 'calbase:default_update_cal' equipment.id calibrations.id %}">{% csrf_token %}
+		{% crispy cal_form %}
+        <button type="submit" class="save btn btn-default" name = "calibration">Save</button>
+    </form>
+
+<a href="{% url 'calbase:default_detail' equipment.id %}">Back?</a>
+
+{% endblock %}

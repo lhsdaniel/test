@@ -1,0 +1,13 @@
+{% if messages %}
+    <div class='alert alert-success fade in'>
+  <a href="." class="close" data-dismiss="alert" aria-label="close">&times;</a>
+
+    <ul class="messages">
+
+    {% for message in messages %}
+    <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{% if "html_safe" in message.tags %}{{ message|safe }}{% else %}Asset Number:{{equipment.asset_number}} - {{ message }}{% endif %}</li>
+    {% endfor %}
+    </ul>
+
+    </div>
+{% endif %}

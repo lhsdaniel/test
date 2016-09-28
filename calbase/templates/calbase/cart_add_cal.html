@@ -1,0 +1,12 @@
+{% extends 'calbase/default.html' %}
+{% load crispy_forms_tags %} 
+{% block content %}
+<form method="POST" action = "{% url 'calbase:cart_add_cal'%}">{% csrf_token %}
+		{{ formset.management_form}}
+		{{ cal_form | crispy}}
+
+        <button type="submit" class="save btn btn-default" name = "cal">Save</button>
+    </form>
+
+<a href="{% url 'calbase:default_overview' %}">Back?</a>
+{% endblock %}

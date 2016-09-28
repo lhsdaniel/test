@@ -1,0 +1,89 @@
+{% extends 'calbase/default.html' %}
+{% load staticfiles %}
+{% load crispy_forms_tags %} 
+
+<script type="text/javascript"
+src="/static/js/RelatedObjectLookups.js"></script>
+
+{% block content %}
+ <div class="container-fluid">
+      <div class="row">
+        <div class="col-sm-3 col-md-2 sidebar">
+          <ul class="nav nav-sidebar">
+            <li><a href="/calbase">Overview <span class="sr-only">(current)</span></a></li>
+            <li><a href="{% url 'calbase:default_new' %}" >New</a></li>
+            <li><a href="{% url 'calbase:default_detail' equipment.id %}" >View</a></li>
+            <li class="active"><a href="{% url 'calbase:default_update' equipment.id %}" >Update</a></li>
+            
+          </ul>
+          <!-- <ul class="nav nav-sidebar">
+            <li><a href="">Nav item</a></li>
+            <li><a href="">Nav item again</a></li>
+            <li><a href="">One more nav</a></li>
+            <li><a href="">Another nav item</a></li>
+            <li><a href="">More navigation</a></li>
+          </ul>
+          <ul class="nav nav-sidebar">
+            <li><a href="">Nav item again</a></li>
+            <li><a href="">One more nav</a></li>
+            <li><a href="">Another nav item</a></li>
+          </ul> -->
+        </div>
+
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+    <h1>Edit</h1>
+    {% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
+
+    {% include "calbase/messages_display.html" %}
+<div class="row">
+                <!-- /.col-lg-8 -->
+    <div class="col-xs-12 col-sm-6 col-md-8">
+            <div class="panel panel-primary">
+                    <div class="panel-heading">
+                            Equipment Detail  
+                    </div>
+                    <div class="panel-body">
+                        <form method='POST' action='' enctype='multipart/form-data'>{% csrf_token %}
+                {% crispy form %}
+                    </form>
+                        </div>
+                </div>
+<!-- <input type='submit' class='btn btn-default'  /> -->
+                        
+                    
+                    
+
+                    </div>
+                </div>
+                <!-- /.col-lg-4 -->
+            <!--     <div class="col-lg-4 ">
+                    <div class="panel panel-primary">
+                        <div class="panel-heading">
+                            Success Panel
+                        </div>
+                        <div class="panel-body">
+                            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum tincidunt est vitae ultrices accumsan. Aliquam ornare lacus adipiscing, posuere lectus et, fringilla augue.</p>
+                        </div>
+                        <div class="panel-footer">
+                            Panel Footer
+                        </div>
+                    </div>
+                </div> -->
+                <!-- /.col-lg-4 -->
+            </div>
+
+
+    
+ 
+
+
+
+ </div>
+
+
+{% block footer %}
+<script type="text/javascript" src="{% static 'admin/js/vendor/jquery/jquery.js' %}"></script>
+{{ form.media }}
+{% endblock %}
+
+{% endblock %}
