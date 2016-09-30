@@ -1,0 +1,293 @@
+{% extends 'new/base.html' %}
+{% load crispy_forms_tags %} 
+{% load staticfiles %}
+{% load static %}
+{% block content %}
+
+<script>
+  function toggle(source) {
+    checkboxes = document.getElementsByName('check_list');
+    for(var i=0, n=checkboxes.length;i<n;i++) {
+      checkboxes[i].checked = source.checked;
+    }
+  }
+</script>
+
+<script>
+  function toggleCart(source) {
+    checkboxes = document.getElementsByName('formlist');
+    for(var i=0, n=checkboxes.length;i<n;i++) {
+      checkboxes[i].checked = source.checked;
+    }
+  }
+</script>
+
+<script>
+$(function(){
+    $("#button").bind("click",function(){
+        $("#idOfYourForm").submit();  // consider idOfYourForm `id` of your form which you are going to submit
+    });
+});
+</script>
+
+
+
+{% include "calbase/messages_display.html" %}
+
+          {% if cart.items %}
+     
+ <div class="hr-divider">
+  <h2 class="hr-divider-content hr-divider-heading">
+    Cart  <span class="badge">{{cart.unique_count}}</span>
+  </h2>
+</div>
+
+
+
+<div class = 'well'>
+        
+
+          
+
+
+
+
+<div class="table-responsive">
+        <table class="table table-striped">
+        <thead>
+            <tr>
+            <th><input type="checkbox" onClick="toggleCart(this)"></th>
+            <th>Asset Number</th>
+            <th>Manufacturer</th>
+            <th>Model</th>
+            <th>Description</th>
+            <th>Time</th>
+            </tr>
+        </thead>
+
+        <tbody>
+              <form id="formlist" action="" method="get" accept-charset="utf-8">
+              {% for item in cart.items %}
+              <tr>
+                    <td><input type="checkbox" name="formlist" value= "{{ item.equipment.id }}"></td>
+                    <td><a href="{% url 'calbase:default_detail' item.equipment.id %}">{{ item.equipment.asset_number }}</a></td>
+                    <td>{% for manuf in item.equipment.manufacturer.all %}{{ manuf }} {% endfor %}</td>
+                    <td>{{ item.equipment.model }}</td>
+                    <td>{% for desc in item.equipment.description.all %}{{ desc }} {% endfor %}</td>
+                    <td>{{ item.equipment.timestamp }}</td>
+              </tr>
+              {% endfor %}
+
+
+
+                          <!-- Button group -->
+
+
+<div class="btn-group">
+    <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Action <span class="caret"></span>
+</button>
+    <ul class="dropdown-menu">
+        <li>  
+          <a href=""> <button  class="btn btn-primary-outline btn-sm" type="submit" >
+          <span class="icon icon-erase" ></span> Remove from cart </button></a></li></form>
+        <li>        
+          <a href="#calModal" data-toggle="modal"><button  class= "btn btn-primary-outline btn-sm"  name = 'group_cal'>
+          <span class="icon icon-cog" ></span>Add Calibrtaions for all carted</button></a></li>
+        <li>  
+         <a href="#flagModal" data-toggle="modal"><button  class= "btn btn-primary-outline btn-sm"  name = 'group_flag'>
+          <span class="icon icon-flag" ></span>Add Flag for all carted</button></a></li>
+        <li>  <a href="/calbase/export/custom"><button  class= "btn btn-primary-outline btn-sm">
+        <span class="icon icon-excel" ></span>Export to excel</button></a></li>
+    </ul>
+</div>
+
+
+
+
+
+
+            
+        </tbody>
+        </table>
+
+<br>
+<br>
+</div><!--  end table-responsive -->
+</div><!--  end well -->
+
+        {% endif %}
+
+
+
+<br>
+
+
+<div class="hr-divider">
+  <h3 class="hr-divider-content hr-divider-heading">
+    Equipment Database!
+  </h3>
+  </div>
+
+
+
+
+
+
+<div class="table-full">
+  <div class="table-responsive">
+      <form id="search_form" method='GET' action='' class='row'>
+        <div class='col-sm-6'>
+          <div class='input-group'>
+            <input class='form-control input-block' type='text' name='q' placeholder='Search All' value='{{ request.GET.q }}'/>
+            <span class='input-group-btn'>
+            <!--  <input class='btn btn-default' type='submit' value='Search' /> -->
+           <button class='btn btn-primary-outline' type='submit' name="search_form">Search <i class="fa fa-search"></i></button>
+            </span>
+          </div>
+        </div> <!-- col size -->
+
+         </form>
+         <table class="table " >
+          <thead>
+            <tr>
+              <th><input type="checkbox" onClick="toggle(this)"></th>
+              <th>Asset Number</th>
+              <th>Serial Number</th>
+              <th>Manufacturer</th>
+              <th>Model</th>
+              <th>Description</th>
+              <th>Time</th>
+              <th>Department</th>
+
+            </tr>
+          </thead>
+
+          <tbody>
+            <form id="checklist" action="/calbase" method="get" accept-charset="utf-8">
+              {% for equipments in equipment_list %}
+              <tr>
+                <div class = "list-group"
+                <a href="#" class="list-group-item list-group-item-action">
+
+                  <td><input type="checkbox" name="check_list" value= "{{ equipments.id }}"></td>
+                  <td><a href="{% url 'calbase:default_detail' equipments.id %}">{{ equipments.asset_number }}</a></td>
+                  <td>{{ equipments.serial_number }}</td>
+                  <td>{% for manuf in equipments.manufacturer.all %}{{ manuf }} {% endfor %}</td>
+                  <td>{{ equipments.model }}</td>
+                  <td>{% for desc in equipments.description.all %}{{ desc }} {% endfor %}</td>
+                  <td>{{ equipments.timestamp }}</td>
+                  <td>{% for dep in equipments.department.all %}{{ dep }} {% endfor %}</td>
+                  
+
+                </tr>
+                {% endfor %}
+                
+                <button  class= "btn btn-primary-outline btn-sm" type="submit" >
+                  <span class="icon icon-plus" ></span>
+
+                  Add to cart
+                </button>
+                
+              </form>
+            </tbody>
+          </table>
+          <div class="pagination">
+            <span class="step-links">
+              {% if equipment_list.has_previous %}
+              <a href="?{{ page_request_var }}={{ object_list.previous_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}">previous</a>
+              {% endif %}
+
+              <span class="current">
+                Page {{ equipment_list.number }} of {{ equipment_list.paginator.num_pages }}.
+              </span>
+
+              {% if equipment_list.has_next %}
+              <a href="?{{ page_request_var }}={{ equipment_list.next_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}">next</a>
+              {% endif %}
+            </span>
+          </div>
+        </div>
+        </div>
+                                                 <!-- MODAL -->
+
+      <div id="docsModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+          <div class="modal-dialog">
+              <div class="modal-content">
+
+              <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="myModalLabel">Add New Equipment</h4>
+              </div>
+              <div class="modal-body">
+
+               
+                  <form method='POST' action='' id = 'equipform' enctype='multipart/form-data'>{% csrf_token %}
+                  {% crispy form %}
+
+                  </form>
+                 .
+
+              </div>
+                <div class="modal-footer">
+                <!--         <button type="button" class="btn btn-primary" data-dismiss="modal">close</button> -->
+                </div>
+              </div>
+          </div>
+      </div>
+
+      <div id="calModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+          <div class="modal-dialog">
+              <div class="modal-content">
+
+              <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="myModalLabel">Add New Equipment</h4>
+              </div>
+              <div class="modal-body">
+
+                  
+                  <form method='POST' action='' id = 'calform' enctype='multipart/form-data'>{% csrf_token %}
+                  {% crispy cal_form %}
+
+                  </form>
+                  .
+
+              </div>
+                <div class="modal-footer">
+                <!--         <button type="button" class="btn btn-primary" data-dismiss="modal">close</button> -->
+                </div>
+              </div>
+          </div>
+      </div>
+
+      <div id="flagModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+          <div class="modal-dialog">
+              <div class="modal-content">
+
+              <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="myModalLabel">Add New Equipment</h4>
+              </div>
+              <div class="modal-body">
+
+                  <p>
+                  <form method='POST' action='' id = 'flagform' enctype='multipart/form-data'>{% csrf_token %}
+                  {% crispy flag_form %}
+
+                  </form>
+                  </p>
+
+              </div>
+                <div class="modal-footer">
+                <!--         <button type="button" class="btn btn-primary" data-dismiss="modal">close</button> -->
+                </div>
+              </div>
+          </div>
+      </div>
+
+      {% block footer %}
+      <script type="text/javascript" src="{% static 'admin/js/vendor/jquery/jquery.js' %}"></script>
+      {{ form.media }}
+      {% endblock %}
+
+      {% endblock %}

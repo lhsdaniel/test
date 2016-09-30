@@ -1,0 +1,252 @@
+{% extends 'new/base.html' %}
+{% load crispy_forms_tags %} 
+{% block content %}
+
+<link rel="stylesheet" href="owl-carousel/owl.carousel.css">
+ 
+<!-- Default Theme -->
+<link rel="stylesheet" href="owl-carousel/owl.theme.css">
+ 
+<!--  jQuery 1.7+  -->
+<script src="jquery-1.9.1.min.js"></script>
+ 
+<!-- Include js plugin -->
+<script src="assets/owl-carousel/owl.carousel.js"></script>
+
+
+<div id="myCarousel" class="carousel slide" data-ride="carousel">
+    <div class="carousel-inner" role="listbox">
+        {% for item in equipment.attachment_set.all %}
+     <div class="item {% if forloop.first %} active {% endif %}"> 
+        <div class="row">
+          <div class="col">
+            <img src = "{{item.file.url}}" class="img-responsive" />
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+        <a class="left carousel-control" href="#myCarousel" role="button" data-slide="prev">
+        <span class="glyphicon glyphicon-chevron-left" aria-hidden="true"></span>
+        <span class="sr-only">Previous</span>
+        </a>
+        <a class="right carousel-control" href="#myCarousel" role="button" data-slide="next">
+        <span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span>
+        <span class="sr-only">Next</span>
+        </a>
+        </div>
+    <!-- /.carousel -->
+        <!-- List of uploaded documents -->
+
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+         <script src="http://getbootstrap.com/dist/js/bootstrap.min.js"></script>
+            <script src="http://getbootstrap.com/assets/js/docs.min.js"></script>
+                <!-- /.col-lg-8 -->
+
+
+<div class="hr-divider">
+  <h3 class="hr-divider-content hr-divider-heading">
+    Equipment Detail
+  </h3>
+  </div>
+
+<div class = 'col-sm-10'>
+
+{% crispy form %}
+
+  <div class="flextable-item">
+    <div class="btn-group">
+    <a href="#calModal" data-toggle="modal">
+      <button type="button" class="btn btn-primary-outline">
+        <span class="icon icon-cog"></span>
+      </button></a>
+
+      <a href="#flagModal" data-toggle="modal">
+      <button type="button" class="btn btn-primary-outline">
+        <span class="icon icon-flag"></span>
+      </button></a>
+    </div>
+  </div>
+
+
+
+</div>
+
+<div class="col-xs-6 col-md-8 ">
+    <div class="panel panel-primary">
+    <div class="panel-heading">
+    Calibrations
+    </div>
+    <div class="panel-body">
+
+    <div class="table-responsive">
+         <table class="table table-striped">
+          <thead>
+            <tr>
+              <th>Calibration Date</th>
+              <th>17025 Check</th>
+              <th>Calibration Lab Name</th>
+              <th>Functional QC Date</th>
+              <th>QC Tested By</th>
+              <th>MU?</th>
+              <th>A2LA Calibration?</th>
+              <th>Location</th>
+              <th>Certification</th>
+
+            </tr>
+          </thead>
+          
+          <tbody>
+              {% for calibrations in equipment.calibration_set.all %}
+              
+              <tr>
+                <div class = "list-group"
+                <a href="#" class="list-group-item list-group-item-action">
+
+                  <td><a href= "{% url 'calbase:default_update_cal' equipment.id calibrations.id %}">{{ calibrations.cal_date }}</a></td>
+                  <td>{{ calibrations.cal_17025_check }}</td>
+                  <td>{{ calibrations.cal_by }}</td>
+                  <td>{{ calibrations.qc_test_date }}</td>
+                  <td>{{ calibrations.qc_test_by }}</td>
+                  <td>{{ calibrations.mesure_uncertainty_included }}</td>
+                  <td>{{ calibrations.a2la_Cal }}</td>
+                  <td>{{ calibrations.location }}</td>
+                  <td>{% if calibrations.cal_cert_location %}<a href= {{calibrations.cal_cert_location.url}}><button  class= "btn btn-default btn-sm" ><span class="glyphicon glyphicon-floppy-save" ></span></button></a>{% endif %}</td>
+                  
+
+                </tr>
+                {% if forloop.first %}
+                        {% block cal %}
+                        {% endblock %}
+                {%endif%}
+
+                {% endfor %}
+                
+                
+                <a href= "{% url 'calbase:default_add_cal' equipment.id %}"><button  class= "btn btn-default btn-sm" type="submit" >
+                  <span class="glyphicon glyphicon-plus" ></span>
+
+                  New Calibration
+                </button></a>
+                {% block new_cal %}
+                {% endblock %}
+                
+            </tbody>
+          </table>
+        </div>
+
+
+
+
+                        <div class="panel-footer">
+                            Panel Footer
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- /.col-lg-4 -->
+            <!--     <div class="col-lg-4 ">
+                    <div class="panel panel-primary">
+                        <div class="panel-heading">
+                            Success Panel
+                        </div>
+                        <div class="panel-body">
+                            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum tincidunt est vitae ultrices accumsan. Aliquam ornare lacus adipiscing, posuere lectus et, fringilla augue.</p>
+                        </div>
+                        <div class="panel-footer">
+                            Panel Footer
+                        </div>
+                    </div>
+                </div> -->
+                <!-- /.col-lg-4 -->
+
+
+
+            </div>
+
+ </div>
+
+               
+
+
+         <div id="calModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+          <div class="modal-dialog">
+              <div class="modal-content">
+
+              <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="myModalLabel">Calibration form</h4>
+              </div>
+              <div class="modal-body">
+
+                  
+                  <form method='POST' action='' enctype='multipart/form-data'>{% csrf_token %}
+                  {% crispy cal_form %}
+
+                  </form>
+
+                      <p>. </p>
+
+                
+
+              </div>
+                <div class="modal-footer">
+                <!--         <button type="button" class="btn btn-primary" data-dismiss="modal">close</button> -->
+                </div>
+              </div>
+          </div>
+      </div>
+
+      <div id="flagModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+          <div class="modal-dialog">
+              <div class="modal-content">
+
+              <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="myModalLabel">Add New Equipment</h4>
+              </div>
+              <div class="modal-body">
+
+                  
+                  <form method='POST' action='' enctype='multipart/form-data'>{% csrf_token %}
+                  {% crispy flag_form %}
+
+                  </form>
+            
+              </div>
+                <div class="modal-footer">
+                <!--         <button type="button" class="btn btn-primary" data-dismiss="modal">close</button> -->
+                </div>
+              </div>
+          </div>
+      </div>
+
+
+<div class="col-xs-6 col-md-4">
+                    <div class="panel panel-primary">
+                        <div class="panel-heading">
+                            Change log
+                        </div>
+                        <div class="panel-body">
+                        {% for history in equipment.history.all %}
+                        <tr>
+                          <td>{{ history.actor }} made the following changes:</td>
+                          <td>{{ history.changes }}</td>
+                          <td>at {{ history.timestamp }}</td>
+                          <br>
+                          </a>
+                        <br>
+                        </tr>
+                        {% endfor %} 
+                    
+                                        
+                        </div>
+                        <div class="panel-footer">
+                            Panel Footer
+                        </div>
+                    </div>
+                </div>
+
+
+{% endblock %}

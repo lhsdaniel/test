@@ -1,4 +1,5 @@
 {% extends 'calbase/default.html' %}
+{% load crispy_forms_tags %} 
 {% block content %}
 
 <script>
@@ -77,9 +78,9 @@
                       <tr>
                         <td><input type="checkbox" name="formlist" value= "{{ item.equipment.id }}"></td>
                         <td><a href="{% url 'calbase:default_detail' item.equipment.id %}">{{ item.equipment.asset_number }}</a></td>
-                        <td>{{ item.equipment.manufacturer.name }}</td>
+                        <td>{% for manuf in item.equipment.manufacturer.all %}{{ manuf }} {% endfor %}</td>
                         <td>{{ item.equipment.model }}</td>
-                        <td>{{ item.equipment.description }}</td>
+                        <td>{% for desc in item.equipment.description.all %}{{ desc }} {% endfor %}</td>
                         <td>{{ item.equipment.timestamp }}</td>
 
 
@@ -153,11 +154,11 @@
                   <td><input type="checkbox" name="check_list" value= "{{ equipments.id }}"></td>
                   <td><a href="{% url 'calbase:default_detail' equipments.id %}">{{ equipments.asset_number }}</a></td>
                   <td>{{ equipments.serial_number }}</td>
-                  <td>{{ equipments.manufacturer }}</td>
+                  <td>{% for manuf in equipments.manufacturer.all %}{{ manuf }} {% endfor %}</td>
                   <td>{{ equipments.model }}</td>
-                  <td>{{ equipments.description }}</td>
+                  <td>{% for desc in equipments.description.all %}{{ desc }} {% endfor %}</td>
                   <td>{{ equipments.timestamp }}</td>
-                  <td>{{ equipments.department }}</td>
+                  <td>{% for dep in equipments.department.all %}{{ dep }} {% endfor %}</td>
                   
 
                 </tr>
@@ -189,5 +190,8 @@
           </div>
         </div>
       </div>
+
+
+      
       {% endblock %}
       

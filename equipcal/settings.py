@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     'crispy_forms',
     'auditlog',
     'popup_forms',
+    'datetimewidget',
 ]
 
 CRISPY_TEMPLATE_PACK = 'bootstrap3'

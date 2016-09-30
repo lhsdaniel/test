@@ -14,6 +14,7 @@ from auditlog.models import AuditlogHistoryField
 from dal import autocomplete
 from crispy_forms.bootstrap import InlineField
 from multiupload.fields import MultiFileField
+from datetimewidget.widgets import DateWidget
 # from crispy_forms.bootstrap import (
 #     PrependedText, PrependedAppendedText, FormActions)
 
@@ -52,6 +53,11 @@ class Description(models.Model):
 	def __str__(self):
 		return self.name
 
+class Capabilities(models.Model):
+	name = models.CharField(max_length=300)
+	def __str__(self):
+		return self.name
+
 class Equipment(models.Model):
 	asset_number = models.CharField(max_length = 200, null=True, unique = True)
 	serial_number = models.CharField(max_length = 200, null=True)
@@ -75,6 +81,9 @@ class Equipment(models.Model):
 	department = models.ManyToManyField(Department)
 	is_flagged = models.CharField(max_length = 100, editable = False, blank = True, default = '')
 	history = AuditlogHistoryField()
+	capabilities = models.ManyToManyField(Capabilities)
+	manuf = models.CharField(max_length = 200, null=True, verbose_name = 'manufacturer')
+	desc = models.CharField(max_length = 200, null=True, verbose_name = 'description')
 	
 	
 
@@ -98,25 +107,33 @@ class Equipment(models.Model):
 			Equipment.objects.filter(id = self.id).update(is_flagged = 'flag')
 		else:
 			Equipment.objects.filter(id = self.id).update(is_flagged = '')
+		manufTemp = ''
+		descTemp = ''
+		for manufacturer in self.manufacturer.all():
+			manufTemp += manufacturer.name
+		for description in self.description.all():
+			descTemp += description.name
+		Equipment.objects.filter(id = self.id).update(manuf = manufTemp)
+		Equipment.objects.filter(id = self.id).update(desc = descTemp)
 	#def latest_calibration_date(self):
 	#	return self._latest_calibration_date
 
 
 class Attachment(models.Model):
-    equip = models.ForeignKey(Equipment, on_delete = models.CASCADE)
+    equip = models.ForeignKey(Equipment, on_delete = models.CASCADE, blank=True, null=True)
     file = models.ImageField(upload_to = 'picture/%Y/%m/%d', null=True, blank=True)
 
 class Calibration(models.Model):
 	cal_asset = models.ForeignKey(Equipment, on_delete = models.CASCADE)
-	cal_by = models.CharField(max_length = 200, null=True)
-	cal_17025_check = models.CharField(max_length = 20, choices = CHECK_CHOICES, null=True)
-	cal_date = models.DateField(null=True)
-	mesure_uncertainty_included = models.BooleanField(default=False)
+	cal_by = models.CharField(max_length = 200, null=True, verbose_name = 'Calibration by')
+	cal_17025_check = models.CharField(max_length = 20, choices = CHECK_CHOICES, null=True, verbose_name = 'Calibration 17205 Checked?')
+	cal_date = models.DateField(null=True, verbose_name = 'Calibration date (YYYY-MM-DD)')
+	mesure_uncertainty_included = models.BooleanField(default=False, verbose_name = 'MU')
 	a2la_Cal = models.BooleanField(default=False)
-	qc_test_by = models.CharField(max_length = 200, null=True, blank = True)
-	qc_test_date = models.DateField(null=True , blank = True)
-	location = models.CharField(max_length = 20, choices = LOCATION_CHOCIES, null=True)
-	cal_cert_location = models.FileField(upload_to = 'cal_cert/', null=True, blank = True)
+	qc_test_by = models.CharField(max_length = 200, null=True, blank = True, verbose_name = 'QC Test by')
+	qc_test_date = models.DateField(null=True , blank = True, verbose_name = 'QC Test date (YYYY-MM-DD)')
+	location = models.CharField(max_length = 20, choices = LOCATION_CHOCIES, null=True, verbose_name = 'Equipment Location')
+	cal_cert_location = models.FileField(upload_to = 'cal_cert/', null=True, blank = True, verbose_name = 'Calibration Certification File')
 	notes = models.CharField(max_length = 200, null=True)
 
 	def is_overdue(self):
@@ -166,49 +183,53 @@ class Flag(models.Model):
 	
 
 class EquipmentForm(ModelForm):
-    placed_in_service_date=forms.DateField(widget=forms.SelectDateWidget)
-    files = MultiFileField(min_num=1, max_num=10, max_file_size=1024*1024*5)
+    placed_in_service_date=forms.DateField(widget=DateWidget(attrs={'id':"yourdatetimeid"}, usel10n = True, bootstrap_version=3))
+    files = MultiFileField(min_num=1, max_num=10, max_file_size=1024*1024*5, required=False)
     used_for_test = forms.ModelMultipleChoiceField(
         queryset=Tests.objects.all(),
         widget=autocomplete.ModelSelect2Multiple(url='calbase:tests'),
     )
-    manufacturer = forms.ModelChoiceField(
+    manufacturer = forms.ModelMultipleChoiceField(
         queryset=Manufacturer.objects.all(),
-        widget=autocomplete.ModelSelect2(url='calbase:manufacturer')
+        widget=autocomplete.ModelSelect2Multiple(url='calbase:manufacturer')
     )
-    description = forms.ModelChoiceField(
+    description = forms.ModelMultipleChoiceField(
         queryset=Description.objects.all(),
-        widget=autocomplete.ModelSelect2(url='calbase:description')
+        widget=autocomplete.ModelSelect2Multiple(url='calbase:description')
     )
     department = forms.ModelMultipleChoiceField(
         queryset=Department.objects.all(),
         widget=autocomplete.ModelSelect2Multiple(url='calbase:department')
+    )
+    capabilities = forms.ModelMultipleChoiceField(
+        queryset=Capabilities.objects.all(),
+        widget=autocomplete.ModelSelect2Multiple(url='calbase:capabilities')
     )
     helper = FormHelper()
     helper.layout = Layout(
         Div(
             Div('asset_number',
                 'serial_number', 
-            	'manufacturer', 
+            	'manufacturer',
             	'model',
             	'description',
 		 		'cal_interval',
 		  		'initial_condition',
 		  		'location',
+		     	css_class='col-sm-5	'),
+            Div(
+ 				
 		   		'department',
 		  	  	'manual_location',
-		  	  	MultiWidgetField('placed_in_service_date', attrs=({'style': 'width: 25%; display: inline-block;'})),
-		     	css_class='col-sm-4'),
-            Div(
- 
+		  	  	'placed_in_service_date',
             	'initial_accessories_included', 
 		  		'used_for_test',
 		  		'files',
+		  		'capabilities',
 
 		   ButtonHolder(
-    
-    Submit('save', 'Save')
-), css_class='col-sm-4'),  
+		  		HTML("<button type='submit' class='save btn btn-default' name = 'equipform'>Save</button>"),
+		  	), css_class='col-sm-4'),  
         css_class='row-fluid'), 
     )
 
@@ -217,7 +238,7 @@ class EquipmentForm(ModelForm):
         fields = ['asset_number', 'serial_number', 'manufacturer', 'model', 'description',
         'cal_interval', 'initial_condition',
         'initial_accessories_included', 'placed_in_service_date',
-        'used_for_test','location', 'department', 'manual_location','files']
+        'used_for_test','location', 'department', 'manual_location','files','capabilities']
 
     def save(self, commit=True):
         instance = super(EquipmentForm, self).save(commit)
@@ -230,6 +251,8 @@ class EquipmentForm(ModelForm):
 		
 class EquipmentFormReadOnly(ModelForm):            
 	placed_in_service_date=forms.DateField(widget=forms.SelectDateWidget)
+	cal_due_date=forms.DateField(widget=forms.SelectDateWidget)
+	latest_calibration_date=forms.DateField(widget=forms.SelectDateWidget)
 	helper = FormHelper()
 	helper.form_read_only = True
 	helper.layout = Layout(
@@ -237,23 +260,23 @@ class EquipmentFormReadOnly(ModelForm):
             Div(
 		  		Field('asset_number', readonly=True),
 		  		Field('serial_number',  readonly=True),
-		  		Field('manufacturer', readonly=True),
+		  		MultiWidgetField('manufacturer', readonly=True, attrs=({'style': 'height: 5%; display: inline-block;', 'readonly':'readonly'})),
 		  		Field('model', readonly=True),
-		  		Field('description', readonly=True),
+		  		MultiWidgetField('description', readonly=True, attrs=({'style': 'height: 5%; display: inline-block;', 'readonly':'readonly'})),
 		  		Field('cal_interval', readonly=True),
 		  		Field('initial_condition', readonly=True),
 		  		Field('location', readonly=True),
- 				MultiWidgetField('placed_in_service_date', readonly=True, attrs=({'style': 'width: 32%; display: inline-block;', 'readonly':'readonly'})),
-		  	  
-		  	  	
+		  		MultiWidgetField('latest_calibration_date', readonly=True, attrs=({'style': 'width: 32%; display: inline-block;', 'readonly':'readonly'})),
+ 				MultiWidgetField('cal_due_date', readonly=True, attrs=({'style': 'width: 32%; display: inline-block;', 'readonly':'readonly'})),
 		     	css_class='col-md-4'),
             Div(
+            	Field('department', readonly=True),
+		  	  	Field('manual_location', readonly=True),
+            	MultiWidgetField('placed_in_service_date', readonly=True, attrs=({'style': 'width: 32%; display: inline-block;', 'readonly':'readonly'})),
  				Field('initial_accessories_included', readonly=True),
  				Field('used_for_test', readonly=True),
+ 				Field('capabilities', readonly=True),
  				
-		  		Field('latest_calibration_date', readonly=True),
-		   		Field('cal_due_date', readonly=True),
-		   		Field('department', readonly=True),
 		   		
 		   	
 		   	 css_class='col-md-4'),  
@@ -265,7 +288,7 @@ class EquipmentFormReadOnly(ModelForm):
 		 'cal_interval', 'initial_condition',
 		'initial_accessories_included', 'placed_in_service_date',
 		   'used_for_test','location', 'department',
-		   		'latest_calibration_date','cal_due_date',]
+		   		'latest_calibration_date','cal_due_date','department', 'manual_location', 'capabilities']
 
 
 class CalibrationFormReadOnly(ModelForm):
@@ -290,11 +313,14 @@ class CalibrationFormReadOnly(ModelForm):
         fields = ['cal_by', 'cal_17025_check', 'cal_date', 'qc_test_by', 'qc_test_date', 'location', 'notes',]
 
 class CalibrationForm(ModelForm):
-    helper = FormHelper()
-    helper.form_tag = False
-    helper.layout = Layout(
-        Div(
-            Div(
+	cal_date=forms.DateField(widget=DateWidget(attrs={'id':"cal_date"}, usel10n = True, bootstrap_version=3))
+	qc_test_date=forms.DateField(widget=DateWidget(attrs={'id':"qc_test_date"}, usel10n = True, bootstrap_version=3))
+
+	helper = FormHelper()
+	helper.form_tag = False
+	helper.layout = Layout(
+		Div(
+			Div(
 		  		Field('cal_by'),
 		  		Field('cal_17025_check'),
 		  		Field('cal_date'),
@@ -306,14 +332,17 @@ class CalibrationForm(ModelForm):
 		  		Field('location'),
 		  		Field('notes'), 
 		  		Field('cal_cert_location'), 
-		  		
+		  			   
+		  			   ButtonHolder(
+		  		HTML("<button type='submit' class='save btn btn-default' name = 'calform'>Save</button>"),
+		  	),
         	), 
         )
     )
 
-    class Meta:
-        model =Calibration
-        fields = ['cal_by', 'cal_17025_check', 'cal_date', 'qc_test_by', 'qc_test_date', 'location', 'notes', 'cal_cert_location', 'a2la_Cal', 'mesure_uncertainty_included']
+	class Meta:
+		model =Calibration
+		fields = ['cal_by', 'cal_17025_check', 'cal_date', 'qc_test_by', 'qc_test_date', 'location', 'notes', 'cal_cert_location', 'a2la_Cal', 'mesure_uncertainty_included']
 
 class FlagForm(ModelForm):
     def __init__(self, *args, **kwargs):
@@ -323,7 +352,9 @@ class FlagForm(ModelForm):
             Div(
             Div('flag_type',
                 'flag_content', 
-          
+          	ButtonHolder(
+		  		HTML("<button type='submit' class='save btn btn-default' name = 'flagform'>Save</button>"),
+		  	),
         css_class='col-sm-5'),  
         css_class='row-fluid'), 
 )

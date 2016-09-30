@@ -1,0 +1,127 @@
+ {% load staticfiles %}
+    {% load carton_tags %}
+    {% get_cart as cart %}
+ <!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="keywords" content="">
+    <meta name="author" content="">
+
+    <title>
+      
+        PCTest Equipment Database &middot; 
+      
+    </title>
+
+    <link href="http://fonts.googleapis.com/css?family=Roboto:300,400,500,700,400italic" rel="stylesheet">
+    
+      <link href='{% static "/assets/css/toolkit-light.css" %}' rel="stylesheet">
+    
+    
+    <link href='{% static "/assets/css/application.css" %}' rel="stylesheet">
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
+    <link href="{{ STATIC_URL }}css/bootstrap.css" rel="stylesheet" type="text/css"/>
+    <script src="{{ STATIC_URL }}js/bootstrap.js"></script>
+    {{ form.media }}
+
+    <style>
+      /* note: this is a hack for ios iframe for bootstrap themes shopify page */
+      /* this chunk of css is not part of the toolkit :) */
+      body {
+        width: 1px;
+        min-width: 100%;
+        *width: 100%;
+      }
+    </style>
+  </head>
+
+  <body>
+  <div class="container-fluid container-fluid-spacious">
+    <div class="row">
+      <div class="col-sm-2 sidebar">
+        <nav class="sidebar-nav">
+          <div class="sidebar-header">
+            <button class="nav-toggler nav-toggler-sm sidebar-toggler" type="button" data-toggle="collapse" data-target="#nav-toggleable-sm">
+              <span class="sr-only">Toggle nav</span>
+            </button>
+            <div class = 'responsive'>
+            <a class="sidebar-brand img-responsive" href="../index.html">
+             <img src="{% static 'img/pctestlogo.png' %}"  width="150"  >
+            </a>
+            </div>
+          </div>
+
+<!-- NAVigation -->
+
+
+
+            <div class="collapse nav-toggleable-sm" id="nav-toggleable-sm">
+           
+            <ul class="nav nav-pills nav-stacked">
+              <li class="nav-header">Dashboards</li>
+              <li >
+                <a href="../index.html">Overview</a>
+              </li>
+              <li class="active">
+                <a href="/calbase">Equipment list</a>
+              </li>
+              <li >
+                <a href="#docsModal" data-toggle="modal">New</a>
+              </li>
+              <li >
+                <a href="/calbase/export/custom">Export</a>
+              </li>
+            </ul>
+            <hr class="visible-xs m-t">
+          </div>
+        </nav>
+      </div>
+
+
+
+      <div class="col-sm-9 content">
+        <div class="dashhead">
+  <div class="dashhead-titles">
+    <h6 class="dashhead-subtitle">Dashboards</h6>
+    <h2 class="dashhead-title">{{ title }}</h2>
+  </div>
+
+  <div class="btn-toolbar dashhead-toolbar">
+    <div class="btn-toolbar-item input-with-icon">
+      <input type="text" value="01/01/15 - 01/08/15" class="form-control" data-provide="datepicker">
+      <span class="icon icon-calendar"></span>
+    </div>
+  </div>
+</div>
+
+
+
+          {% block content %}
+          {% endblock %}
+
+
+       
+
+
+
+            
+                
+           
+
+
+    <script src='{% static "/assets/js/jquery.min.js"%}'></script>
+    <script src='{% static "/assets/js/chart.js"%}'></script>
+    <script src='{% static "/assets/js/tablesorter.min.js"%}'></script>
+    <script src='{% static "/assets/js/toolkit.js"%}'></script>
+    <script src='{% static "/assets/js/application.js"%}'></script>
+    <script>
+      // execute/clear BS loaders for docs
+      $(function(){while(window.BS&&window.BS.loader&&window.BS.loader.length){(window.BS.loader.pop())()}})
+    </script>
+  </body>
+</html>

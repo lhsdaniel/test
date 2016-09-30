@@ -4,7 +4,7 @@ from . import views
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib.auth import views as auth_views
-from .views import TestsAutocomplete, DepartmentAutocomplete, DescriptionAutocomplete, ManufacturerAutocomplete
+from .views import TestsAutocomplete, DepartmentAutocomplete, DescriptionAutocomplete, ManufacturerAutocomplete, CapabilitiesAutocomplete
 
 
 urlpatterns = [
@@ -39,5 +39,7 @@ urlpatterns = [
     url(r'^department-autocomplete/$', DepartmentAutocomplete.as_view(create_field='name'), name='department',),
     url(r'^description-autocomplete/$', DescriptionAutocomplete.as_view(create_field='name'), name='description',),
     url(r'^manufacturer-autocomplete/$', ManufacturerAutocomplete.as_view(create_field='name'), name='manufacturer',),
+    url(r'^capabilities-autocomplete/$', CapabilitiesAutocomplete.as_view(create_field='name'), name='capabilities',),
+    
 
 ]

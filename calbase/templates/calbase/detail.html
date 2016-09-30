@@ -1,0 +1,90 @@
+{% extends 'new/base.html' %}
+{% load crispy_forms_tags %} 
+{% block content %}
+
+
+
+<div class="hr-divider">
+  <h3 class="hr-divider-content hr-divider-heading">
+    Equipment Detail
+  </h3>
+  </div>
+
+<div class = 'col-sm-10'>
+{% crispy form %}
+
+  <div class="flextable-item">
+    <div class="btn-group">
+    <a href="#calModal" data-toggle="modal">
+      <button type="button" class="btn btn-primary-outline">
+        <span class="icon icon-cog"></span>
+      </button></a>
+
+      <a href="#flagModal" data-toggle="modal">
+      <button type="button" class="btn btn-primary-outline">
+        <span class="icon icon-flag"></span>
+      </button></a>
+    </div>
+  </div>
+
+
+
+</div>
+
+               
+
+
+         <div id="calModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+          <div class="modal-dialog">
+              <div class="modal-content">
+
+              <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="myModalLabel">Calibration form</h4>
+              </div>
+              <div class="modal-body">
+
+                  
+                  <form method='POST' action='' enctype='multipart/form-data'>{% csrf_token %}
+                  {% crispy cal_form %}
+
+                  </form>
+
+                      <p>. </p>
+
+                
+
+              </div>
+                <div class="modal-footer">
+                <!--         <button type="button" class="btn btn-primary" data-dismiss="modal">close</button> -->
+                </div>
+              </div>
+          </div>
+      </div>
+
+      <div id="flagModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+          <div class="modal-dialog">
+              <div class="modal-content">
+
+              <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="myModalLabel">Add New Equipment</h4>
+              </div>
+              <div class="modal-body">
+
+                  
+                  <form method='POST' action='' enctype='multipart/form-data'>{% csrf_token %}
+                  {% crispy flag_form %}
+
+                  </form>
+            
+              </div>
+                <div class="modal-footer">
+                <!--         <button type="button" class="btn btn-primary" data-dismiss="modal">close</button> -->
+                </div>
+              </div>
+          </div>
+      </div>
+
+
+{% endblock %}

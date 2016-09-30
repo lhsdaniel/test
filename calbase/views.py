@@ -5,7 +5,7 @@ from django.utils import timezone
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.views import generic
 from django.urls import reverse
-from .models import Equipment,Calibration,Flag, Tests, Description, Department, Manufacturer
+from .models import Equipment,Calibration,Flag, Tests, Description, Department, Manufacturer, Capabilities
 from django.http import HttpResponse, HttpResponseRedirect
 from django.forms.models import inlineformset_factory
 from .models import EquipmentFormReadOnly, CalibrationFormReadOnly
@@ -25,6 +25,10 @@ from django.template.loader import render_to_string
 
 def default(request):
     # today = timezone.now().date()
+    cart = Cart(request.session)
+    form = EquipmentForm(request.POST or None, request.FILES or None)
+    cal_form = CalibrationForm(request.POST or None, request.FILES or None)
+    flag_form = FlagForm(request.POST or None, request.FILES or None)
     queryset_list = Equipment.objects.all().order_by("-timestamp")
     if request.user.is_staff or request.user.is_superuser:
         queryset_list = Equipment.objects.all().order_by("-timestamp")
@@ -62,6 +66,54 @@ def default(request):
                 cart = Cart(request.session)
                 cart.add(equip)
     
+    if request.method == "POST":
+        if 'equipform' in request.POST:
+            if form.is_valid():
+                post = form.save()
+                messages.success(request, "Created")
+                return HttpResponseRedirect("/calbase/")
+
+        elif 'calform' in request.POST:
+             if cal_form.is_valid():
+                cal_by = cal_form.cleaned_data['cal_by']
+                cal_17025_check = cal_form.cleaned_data['cal_17025_check']
+                cal_date = cal_form.cleaned_data['cal_date']
+                mesure_uncertainty_included = cal_form.cleaned_data['mesure_uncertainty_included']
+                a2la_Cal = cal_form.cleaned_data['a2la_Cal']
+                qc_test_by = cal_form.cleaned_data['qc_test_by']
+                qc_test_date = cal_form.cleaned_data['qc_test_date']
+                location = cal_form.cleaned_data['location']
+                notes = cal_form.cleaned_data['notes']
+                cal_cert_location = cal_form.cleaned_data['cal_cert_location']
+
+                cart_representation = cart.session[cart.session_key]
+                ids_in_cart = cart_representation.keys()
+                equipments_queryset = cart.get_queryset().filter(pk__in=ids_in_cart)
+
+                for equip in equipments_queryset:
+                    cal = Calibration.objects.create(cal_asset = equip, cal_by = cal_by, cal_17025_check = cal_17025_check,
+                     cal_date = cal_date, mesure_uncertainty_included = mesure_uncertainty_included, 
+                     a2la_Cal = a2la_Cal, qc_test_by = qc_test_by, qc_test_date = qc_test_date, 
+                     location = location, notes = notes, cal_cert_location = cal_cert_location)
+                    cal.save()
+                messages.success(request, "Sucessfully Add Calibrations to Group " )
+                return HttpResponseRedirect(reverse('calbase:default_overview'))
+
+        elif 'flagform' in request.POST:
+            if flag_form.is_valid():
+                flag_type = flag_form.cleaned_data['flag_type']
+                flag_content = flag_form.cleaned_data['flag_content']
+                cart_representation = cart.session[cart.session_key]
+                ids_in_cart = cart_representation.keys()
+                equipments_queryset = cart.get_queryset().filter(pk__in=ids_in_cart)
+                for equip in equipments_queryset:
+                    flag = Flag.objects.create(flag_asset = equip, flag_type = flag_type, flag_content = flag_content)
+                    flag.save()
+                messages.success(request, "Sucessfully Flagged Group " )
+                return HttpResponseRedirect(reverse('calbase:default_overview'))
+                        
+
+
     paginator = Paginator(queryset_list, 8) # Show 25 contacts per page
     page_request_var = "page"
     page = request.GET.get(page_request_var)
@@ -81,14 +133,17 @@ def default(request):
         "equipment_list": queryset, 
         "title": "List",
         "page_request_var": page_request_var,
+        "form" : form,
+        "flag_form" : flag_form,
+        "cal_form"  : cal_form,
         # "today": today,
     }
-    return render(request, "calbase/default_overview.html", context)
+    return render(request, "new/list.html", context)
 
 # def default (request):
-# 	equipment_list = Equipment.objects.all()
-# 	context = {'equipment_list' : equipment_list}
-# 	return render(request, 'calbase/default_overview.html', context)
+#   equipment_list = Equipment.objects.all()
+#   context = {'equipment_list' : equipment_list}
+#   return render(request, 'calbase/default_overview.html', context)
 
 @login_required
 @permission_required('calbase.add_equipment')
@@ -106,10 +161,13 @@ def default_new (request):
 @login_required
 def default_detail (request, equipment_id):
     equipment = Equipment.objects.get(id = equipment_id)
-    form = EquipmentFormReadOnly(request.POST or None, request.FILES or None, instance=equipment)
+    form = EquipmentFormReadOnly(instance=equipment)
     equipments =  Equipment.objects.all()
-    context = {'equipment' : equipment, "form":form, 'equipments': equipments}
-    return render(request, 'calbase/default_detail.html', context)
+    cal_form = CalibrationForm()
+    flag_form = FlagForm()
+    context = {'equipment' : equipment, "form":form, 'equipments': equipments, 'cal_form': cal_form,
+              'flag_form': flag_form,}
+    return render(request, 'new/detail.html', context)
 
 @login_required
 @permission_required('calbase.change_equipment')
@@ -117,10 +175,10 @@ def post_update(request, equipment_id):
     equipment = get_object_or_404(Equipment, id = equipment_id)
     form = EquipmentForm(request.POST or None, request.FILES or None, instance=equipment)
     if form.is_valid():
-        instance = form.save()
+        post = form.save()
         messages.success(request, "Sucessfully Saved " )
         #messages.success(request, "<a href='#'>Item</a> Saved", extra_tags='html_safe')
-        return HttpResponseRedirect(instance.get_absolute_url())
+        return HttpResponseRedirect(post.get_absolute_url())
 
     context = {
         "equipment": equipment,
@@ -244,7 +302,7 @@ def export_data(request, atype):
     cart = Cart(request.session)
     if atype == "sheet":
         #query_sets = Equipment.objects.all()
-        query_record = Equipment.objects.all().values('manufacturer', 'model', 'description', 
+        query_record = Equipment.objects.all().values('manuf', 'model', 'desc', 
             'cal_interval', 'serial_number', 'latest_calibration_date', 'cal_due_date')
         #sheet = get_sheet(query_sets=query_record, column_names=["manufacturer"])
 
@@ -255,7 +313,7 @@ def export_data(request, atype):
         return excel.make_response_from_tables(
             [Equipment, Calibration], 'xls', file_name="book")
     elif atype == "custom":
-        column_names = ['manufacturer', 'model', 'description', 
+        column_names = ['asset_number','manuf', 'model', 'desc', 
             'cal_interval', 'serial_number', 'latest_calibration_date', 'cal_due_date']
         cart_representation = cart.session[cart.session_key]
         ids_in_cart = cart_representation.keys()
@@ -378,6 +436,19 @@ class ManufacturerAutocomplete(autocomplete.Select2QuerySetView):
             return Manufacturer.objects.none()
 
         qs = Manufacturer.objects.all()
+
+        if self.q:
+            qs = qs.filter(name__istartswith=self.q)
+
+        return qs
+
+class CapabilitiesAutocomplete(autocomplete.Select2QuerySetView):
+    def get_queryset(self):
+        # Don't forget to filter out results depending on the visitor !
+        if not self.request.user.is_authenticated():
+            return Capabilities.objects.none()
+
+        qs = Capabilities.objects.all()
 
         if self.q:
             qs = qs.filter(name__istartswith=self.q)

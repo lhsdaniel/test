@@ -1,0 +1,71 @@
+{% extends 'new/base.html' %}
+ {% load staticfiles %}
+
+
+<!-- NAVigation -->
+
+
+
+            <div class="collapse nav-toggleable-sm" id="nav-toggleable-sm">
+            <form class="sidebar-form">
+              <input class="form-control" type="text" placeholder="Search...">
+              <button type="submit" class="btn-link">
+                <span src="{% static 'img/pctestlogo.png' %}"></span>
+              </button>
+            </form>
+            <ul class="nav nav-pills nav-stacked">
+              <li class="nav-header">Dashboards</li>
+              <li >
+                <a href="../index.html">Overview</a>
+              </li>
+              <li class="active">
+                <a href="/calbase">Equipment list</a>
+              </li>
+              <li >
+                <a href="{% url 'calbase:default_new' %}">New</a>
+              </li>
+              <li >
+                <a href="/calbase/export/custom">Export</a>
+              </li>
+
+              <li class="nav-header">More</li>
+              <li >
+                <a href="../docs/index.html">
+                  Toolkit docs
+                </a>
+              </li>
+              <li>
+                <a href="http://getbootstrap.com" target="blank">
+                  Bootstrap docs
+                </a>
+              </li>
+              <li >
+                <a href="../light/index.html">Light UI</a>
+              </li>
+              <li>
+                <a href="#docsModal" data-toggle="modal">
+                  Example modal
+                </a>
+              </li>
+            </ul>
+            <hr class="visible-xs m-t">
+          </div>
+        </nav>
+      </div>
+
+
+
+      <div class="col-sm-9 content">
+        <div class="dashhead">
+  <div class="dashhead-titles">
+    <h6 class="dashhead-subtitle">Dashboards</h6>
+    <h2 class="dashhead-title">Equipment Database!</h2>
+  </div>
+
+  <div class="btn-toolbar dashhead-toolbar">
+    <div class="btn-toolbar-item input-with-icon">
+      <input type="text" value="01/01/15 - 01/08/15" class="form-control" data-provide="datepicker">
+      <span class="icon icon-calendar"></span>
+    </div>
+  </div>
+</div>

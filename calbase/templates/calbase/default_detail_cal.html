@@ -2,7 +2,7 @@
 {% load crispy_forms_tags %} 
 
 {% block cal %}
-<form method="POST" action = "{% url 'calbase:default_update_cal' equipment.id calibrations.id %}">{% csrf_token %}
+<form method="POST" action = "{% url 'calbase:default_update_cal' equipment.id calibrations.id %}", enctype='multipart/form-data'>{% csrf_token %}
 		{% crispy cal_form %}
         <button type="submit" class="save btn btn-default" name = "calibration">Save</button>
     </form>

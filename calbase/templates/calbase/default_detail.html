@@ -77,7 +77,7 @@
          <script src="http://getbootstrap.com/dist/js/bootstrap.min.js"></script>
             <script src="http://getbootstrap.com/assets/js/docs.min.js"></script>
                 <!-- /.col-lg-8 -->
-    <a style="display:block" href="{% url 'calbase:default_update' equipment.id %}">
+    
     <div class="col-xs-12 col-sm-6 col-md-8">
 
 
@@ -92,10 +92,10 @@
 
                     
 
-
+                    <a style="display:block" href="{% url 'calbase:default_update' equipment.id %}">
                     <div class="panel-body">
                 {% crispy form %}
-                    </div>
+                    </div></a>
                         {% if equipment.is_flagged == '' %}
                             <a href="{% url 'calbase:default_add_flag' equipment.id %}"><img src="{% static 'img/unflag-icon.png' %}" class="img-responsive"  width="50" height="50" ></a>
                         {% else%}
@@ -110,7 +110,7 @@
                     
                     
 
-</div></a>
+</div>
 <div class="col-xs-6 col-md-8 ">
     <div class="panel panel-primary">
     <div class="panel-heading">
@@ -127,10 +127,10 @@
               <th>Calibration Lab Name</th>
               <th>Functional QC Date</th>
               <th>QC Tested By</th>
-              <th>Measure Uncertainty Included?</th>
+              <th>MU?</th>
               <th>A2LA Calibration?</th>
               <th>Location</th>
-              <th>Notes</th>
+              <th>Certification</th>
 
             </tr>
           </thead>
@@ -150,7 +150,7 @@
                   <td>{{ calibrations.mesure_uncertainty_included }}</td>
                   <td>{{ calibrations.a2la_Cal }}</td>
                   <td>{{ calibrations.location }}</td>
-                  <td>{{ calibrations.notes }}</td>
+                  <td>{% if calibrations.cal_cert_location %}<a href= {{calibrations.cal_cert_location.url}}><button  class= "btn btn-default btn-sm" ><span class="glyphicon glyphicon-floppy-save" ></span></button></a>{% endif %}</td>
                   
 
                 </tr>
