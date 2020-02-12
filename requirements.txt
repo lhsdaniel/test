@@ -1,4 +1,4 @@
-Django==1.10
+Django==1.11.28
 django-admin-views==0.8.0
 django-adminplus==0.5
 django-ajax-selects==1.5.0
